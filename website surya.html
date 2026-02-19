@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SURYA-ARCHIVE | SURYAENTERTAINMENT 5.2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --dark-bg: #020204;
+            --glass: rgba(15, 15, 25, 0.95);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            background-image: radial-gradient(circle at center, #111 0%, #020204 100%);
+        }
+
+        /* --- LOGIN GATEKEEPER --- */
+        #loginGate {
+            position: fixed; inset: 0; z-index: 6000;
+            background: var(--dark-bg);
+            display: flex; justify-content: center; align-items: center;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .login-card {
+            background: var(--glass);
+            padding: 40px; border-radius: 20px;
+            border: 1px solid var(--neon-blue);
+            width: 90%; max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+        }
+
+        .input-secure {
+            width: 100%; background: rgba(0,0,0,0.5);
+            border: 1px solid #333; color: var(--neon-blue);
+            padding: 12px; border-radius: 5px; margin-bottom: 20px;
+            text-align: center; font-family: 'Orbitron'; letter-spacing: 5px;
+            outline: none; transition: 0.3s;
+        }
+
+        .login-btn {
+            width: 100%; padding: 15px; margin: 5px 0;
+            border: 1px solid var(--neon-blue);
+            background: transparent; color: white;
+            font-family: 'Orbitron'; cursor: pointer;
+            transition: 0.4s; border-radius: 5px;
+        }
+
+        .btn-admin:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 30px var(--neon-blue); }
+        .btn-public:hover { border-color: var(--neon-pink); background: var(--neon-pink); color: black; box-shadow: 0 0 30px var(--neon-pink); }
+
+        /* --- MAIN UI --- */
+        #mainUI { opacity: 0; height: 100vh; overflow-y: auto; display: none; }
+        
+        header { padding: 80px 20px 40px; text-align: center; }
+        .logo-text { font-family: 'Orbitron'; letter-spacing: 15px; font-size: 3rem; text-shadow: 0 0 20px var(--neon-blue); }
+
+        .search-bar {
+            width: 100%; max-width: 600px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,243,255,0.3); padding: 15px 25px;
+            border-radius: 30px; color: white; outline: none; margin: 20px auto; display: block;
+        }
+
+        .gallery-grid {
+            padding: 0 8% 100px; display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;
+        }
+
+        .photo-card {
+            background: var(--glass); border-radius: 15px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.5s; position: relative;
+        }
+        .photo-card:hover { transform: translateY(-10px); border-color: var(--neon-blue); }
+        .photo-card img { width: 100%; height: 280px; object-fit: cover; }
+        .card-info { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 50%; display: flex;
+            justify-content: center; align-items: center; cursor: pointer;
+            transition: 0.3s; background: rgba(255,255,255,0.05); border: none; color: white;
+        }
+        .btn-dl:hover { background: var(--neon-pink); color: black; box-shadow: 0 0 15px var(--neon-pink); }
+        .btn-del:hover { background: #ff4d4d; color: white; box-shadow: 0 0 15px #ff4d4d; }
+
+        /* --- UI ELEMENTS --- */
+        .fab {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            background: var(--neon-blue); border-radius: 50%; display: none;
+            justify-content: center; align-items: center; cursor: pointer;
+            box-shadow: 0 0 20px var(--neon-blue); transition: 0.3s; z-index: 100;
+        }
+
+        .access-badge {
+            position: fixed; top: 20px; right: 20px;
+            padding: 8px 20px; border-radius: 20px; font-size: 0.7rem;
+            font-family: 'Orbitron'; border: 1px solid; backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+
+        #authSequence {
+            position: fixed; inset: 0; background: var(--dark-bg);
+            z-index: 5000; display: none; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginGate">
+        <div class="login-card">
+            <h2 style="font-family:'Orbitron'; margin-bottom:10px; color:var(--neon-blue);">SURYA-ARCHIVE</h2>
+            <p style="font-size: 0.7rem; opacity: 0.5; margin-bottom: 30px; letter-spacing: 3px;">SURYAENTERTAINMENT 5.2</p>
+            <input type="password" id="passInput" class="input-secure" placeholder="••••••••">
+            <button class="login-btn btn-admin" onclick="verify('admin')">ADMIN_LOGIN</button>
+            <button class="login-btn btn-public" onclick="verify('public')">PUBLIC_VIEW</button>
+            <p id="errMsg" style="color:var(--neon-pink); font-size:0.7rem; margin-top:15px; visibility:hidden;">CODE SALAH...</p>
+        </div>
+    </div>
+
+    <div id="authSequence">
+        <div style="text-align:center;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size:3rem; color:var(--neon-blue); margin-bottom:20px;"></i>
+            <p id="authText" style="font-family:'Orbitron'; letter-spacing:8px; font-size:0.8rem;">SABAR YA MASIH MEMUAT...</p>
+        </div>
+    </div>
+
+    <div id="mainUI">
+        <div style="position:fixed; top:20px; left:20px; font-family:'Orbitron'; font-size:0.6rem; cursor:pointer;" onclick="location.reload()">[ KELUAR ]</div>
+        <div id="roleBadge" class="access-badge"></div>
+        
+        <header>
+            <h1 class="logo-text">SURYA-ARCHIVE
+            <input type="text" id="search" class="search-bar" placeholder="SEARCH_VAULT..." oninput="loadGallery()">
+        </header>
+
+        <main class="gallery-grid" id="gallery"></main>
+
+        <div id="adminFab" class="fab" onclick="toggleModal(true)"><i class="fas fa-plus"></i></div>
+    </div>
+
+    <div class="modal" id="addModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:8000; display:none; justify-content:center; align-items:center;">
+        <div style="background:#0a0a0f; border:1px solid var(--neon-blue); padding:40px; border-radius:20px; width:400px;">
+            <h3 style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:20px;">MASUKAN_FOTO</h3>
+            <input type="file" id="fileInput" hidden onchange="previewFile(this)">
+            <div onclick="document.getElementById('fileInput').click()" style="width:100%; height:150px; border:2px dashed #222; border-radius:10px; display:flex; justify-content:center; align-items:center; cursor:pointer; overflow:hidden; position:relative;">
+                <i class="fas fa-camera" style="opacity:0.2;"></i>
+                <img id="prevImg" style="position:absolute; width:100%; height:100%; object-fit:cover; display:none;">
+            </div>
+            <input type="text" id="newName" class="search-bar" style="margin:20px 0; border-radius:10px;" placeholder="LABEL">
+            <button onclick="handleSave()" style="width:100%; padding:15px; background:var(--neon-blue); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">PILIH FOTO</button>
+            <button onclick="toggleModal(false)" style="width:100%; margin-top:10px; background:none; color:grey; border:none; cursor:pointer;">BATAL</button>
+        </div>
+    </div>
+
+    <script>
+        let db;
+        let currentUserRole = 'public';
+        let currentImg = "";
+
+        const request = indexedDB.open("NeoArchiveDB", 1);
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            db.createObjectStore("gallery", { keyPath: "id", autoIncrement: true });
+        };
+        request.onsuccess = (e) => db = e.target.result;
+
+        function verify(role) {
+            const pass = document.getElementById('passInput').value;
+            if ((role === 'admin' && pass === "ADMIN123") || (role === 'public' && pass === "USER123")) {
+                currentUserRole = role;
+                gsap.to("#loginGate", { opacity: 0, duration: 0.5, onComplete: () => {
+                    document.getElementById('loginGate').style.display = 'none';
+                    document.getElementById('authSequence').style.display = 'flex';
+                    setTimeout(openMain, 1500);
+                }});
+            } else {
+                document.getElementById('errMsg').style.visibility = 'visible';
+            }
+        }
+
+        function openMain() {
+            gsap.to("#authSequence", { opacity: 0, duration: 0.5, onComplete: () => {
+                document.getElementById('authSequence').style.display = 'none';
+                document.getElementById('mainUI').style.display = 'block';
+                gsap.to("#mainUI", { opacity: 1 });
+                document.body.style.overflow = "auto";
+                if(currentUserRole === 'admin') document.getElementById('adminFab').style.display = 'flex';
+                
+                const badge = document.getElementById('roleBadge');
+                badge.innerText = currentUserRole.toUpperCase() + "_MODE";
+                badge.style.color = currentUserRole === 'admin' ? 'var(--neon-blue)' : 'var(--neon-pink)';
+                badge.style.borderColor = currentUserRole === 'admin' ? 'var(--neon-blue)' : 'var(--neon-pink)';
+                loadGallery();
+            }});
+        }
+
+        function loadGallery() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const store = db.transaction("gallery").objectStore("gallery");
+            store.getAll().onsuccess = (e) => {
+                let items = e.target.result.reverse();
+                if(query) items = items.filter(i => i.name.toLowerCase().includes(query));
+                
+                document.getElementById('gallery').innerHTML = items.map(i => `
+                    <div class="photo-card">
+                        <img src="${i.img}">
+                        <div class="card-info">
+                            <div><small>ID_${i.id}</small><br><strong>${i.name}</strong></div>
+                            <div style="display:flex; gap:10px;">
+                                <a href="${i.img}" download="${i.name}.jpg" class="btn-icon btn-dl"><i class="fas fa-download"></i></a>
+                                ${currentUserRole === 'admin' ? `<button onclick="deleteData(${i.id})" class="btn-icon btn-del"><i class="fas fa-trash"></i></button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+        }
+
+        // Admin Logic
+        function toggleModal(show) { document.getElementById('addModal').style.display = show ? 'flex' : 'none'; }
+        function previewFile(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImg = e.target.result;
+                document.getElementById('prevImg').src = currentImg;
+                document.getElementById('prevImg').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+        function handleSave() {
+            const name = document.getElementById('newName').value || "UNNAMED";
+            const trans = db.transaction(["gallery"], "readwrite");
+            trans.objectStore("gallery").add({ img: currentImg, name: name });
+            trans.oncomplete = () => { toggleModal(false); loadGallery(); };
+        }
+        function deleteData(id) {
+            if(confirm("DELETE?")) {
+                const trans = db.transaction(["gallery"], "readwrite");
+                trans.objectStore("gallery").delete(id);
+                trans.oncomplete = () => loadGallery();
+            }
+        }
+    </script>
+</body>
+</html>
